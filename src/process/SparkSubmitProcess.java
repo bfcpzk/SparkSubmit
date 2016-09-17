@@ -60,7 +60,8 @@ public class SparkSubmitProcess {
                 "lib/SparkGibbsLDAWeibo.jar",
                 "spark://127.0.0.1:7077",//args(0) masterip
                 root_dir,//args(1) 根目录位置
-                text//args(2) 待推断的文本
+                text,//args(2) 待推断的文本
+                "@#@",//args(3) 文本分割符,可自定义
         };
 
         //提交作业
@@ -72,7 +73,7 @@ public class SparkSubmitProcess {
         System.out.println(result);
     }
 
-    public void relevanceCalcualtion(String file_name, String num_word){
+    public void relevanceCalcualtion(String file_name, String num_word) throws IOException{
 
         //清除上次的训练结果
         hdfsUtil.checkAndDel(root_dir + "weibo/out/relevanceCalculation", conf);
@@ -89,6 +90,9 @@ public class SparkSubmitProcess {
 
         //提交作业
         SparkSubmit.main(args);
+
+        //读取计算结果(一共ktopic + 2项) 第一项是用户ID,程序里面写死了,展示的时候可以不要这个字段, 中间是ktopic个概率分布, 最后一项是所有分布值加合
+        String result = hdfsUtil.readFromHDFS(root_dir + "weibo/out/relevanceCalculation/part-00000", conf);
     }
 
     public static void main(String[] args)throws IOException{
@@ -97,7 +101,7 @@ public class SparkSubmitProcess {
         String num_word = "1000";
         //tt.trainLda(file_name);
 
-        //String text = "抄 手 北京 美食 海淀 吃 美食 攻 编 盘点 海淀 吃 美食 冰山 一角 美食 等待 去 发现";
+        String text = "嘻嘻 哈哈 天天向上@#@抄 手 北京 美食 海淀 吃 美食 攻 编 盘点 海淀 吃 美食 冰山 一角 美食 等待 去 发现";
         //tt.predictLda(text);
 
         tt.relevanceCalcualtion(file_name, num_word);

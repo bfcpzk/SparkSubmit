@@ -73,10 +73,18 @@ public class SparkSubmitProcess {
         System.out.println(result);
     }
 
-    public void relevanceCalcualtion(String file_name, String num_word) throws IOException{
+    public void relevanceCalculation(String file_name, String num_word, String flag) throws IOException{
 
+        //根据flag确定输出的是对训练集的计算还是对测试集的计算
+        String output_file = "";
+
+        if(flag.equals("0")){//训练集
+            output_file = "topicDistOnDoc";
+        }else{//测试集
+            output_file = "theta";
+        }
         //清除上次的训练结果
-        hdfsUtil.checkAndDel(root_dir + "weibo/out/relevanceCalculation", conf);
+        hdfsUtil.checkAndDel(root_dir + "weibo/out/" + output_file + "_relevanceCalculation", conf);
 
         //配置spark训练参数
         String[] args = new String[]{
@@ -86,24 +94,27 @@ public class SparkSubmitProcess {
                 num_word, //args(1) queryset中词的个数
                 root_dir, //args(2) location on hdfs
                 "spark://localhost:7077",//args(3) masterip
+                flag //args(4) 区别对训练集和测试集的计算 "0"代表训练集, "1"代表测试集
         };
 
         //提交作业
         SparkSubmit.main(args);
 
         //读取计算结果(一共ktopic + 2项) 第一项是用户ID,程序里面写死了,展示的时候可以不要这个字段, 中间是ktopic个概率分布, 最后一项是所有分布值加合
-        String result = hdfsUtil.readFromHDFS(root_dir + "weibo/out/relevanceCalculation/part-00000", conf);
+        String result = hdfsUtil.readFromHDFS(root_dir + "weibo/out/" + output_file + "_relevanceCalculation/part-00000", conf);
     }
 
     public static void main(String[] args)throws IOException{
         SparkSubmitProcess tt = new SparkSubmitProcess();
-        String file_name = "weiboLdaTest.txt";
+        String file_name = "SparkShow.txt";
         String num_word = "1000";
         //tt.trainLda(file_name);
 
         String text = "嘻嘻 哈哈 天天向上@#@抄 手 北京 美食 海淀 吃 美食 攻 编 盘点 海淀 吃 美食 冰山 一角 美食 等待 去 发现";
         //tt.predictLda(text);
 
-        tt.relevanceCalcualtion(file_name, num_word);
+        String flag = "0";//0代表计算训练集, 1 代表测试集
+
+        tt.relevanceCalculation(file_name, num_word, flag);
     }
 }

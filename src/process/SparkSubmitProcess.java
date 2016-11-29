@@ -56,6 +56,7 @@ public class SparkSubmitProcess {
 
         //配置spark训练参数
         String[] args = new String[]{
+                "spark.driver.allMultipleContext","true",
                 "--class","spark.mllib.SparkGibbsLDAPredict",
                 "lib/SparkGibbsLDAWeibo.jar",
                 "spark://127.0.0.1:7077",//args(0) masterip
@@ -111,10 +112,10 @@ public class SparkSubmitProcess {
         //tt.trainLda(file_name);
 
         String text = "嘻嘻 哈哈 天天向上@#@抄 手 北京 美食 海淀 吃 美食 攻 编 盘点 海淀 吃 美食 冰山 一角 美食 等待 去 发现";
-        //tt.predictLda(text);
+        tt.predictLda(text);
 
         String flag = "0";//0代表计算训练集, 1 代表测试集
 
-        tt.relevanceCalculation(file_name, num_word, flag);
+        //tt.relevanceCalculation(file_name, num_word, flag);
     }
 }
